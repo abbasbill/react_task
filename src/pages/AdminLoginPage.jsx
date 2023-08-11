@@ -5,6 +5,8 @@ import * as yup from "yup";
 import MkdSDK from "../utils/MkdSDK";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../authContext";
+import SnackBar from "../components/SnackBar";
+import { GlobalContext, showToast } from "../globalContext";
 
 const AdminLoginPage = () => {
   const schema = yup
@@ -14,7 +16,7 @@ const AdminLoginPage = () => {
     })
     .required();
 
-  const { dispatch } = React.useContext(AuthContext);
+  const { dispatch, state } = React.useContext(AuthContext, GlobalContext);
   const navigate = useNavigate();
   const {
     register,
@@ -26,8 +28,26 @@ const AdminLoginPage = () => {
   });
 
   const onSubmit = async (data) => {
-    let sdk = new MkdSDK();
+    data.role = "admin"
     //TODO
+    try {
+      let sdk = new MkdSDK();
+      let result = await sdk.login(data)
+      if(result){
+          console.log(result)
+
+          localStorage.setItem("token", JSON.stringify(result?.token));
+          navigate("/admin/dashboard")
+        // showToast(dispatch({
+        //   type: "SNACKBAR",
+        //   payload: { message: "Login Sucessful" },
+        // }), "Login Successful");
+      }
+    } catch (error) {
+      wimdow.alert("Failed")
+    }
+
+    
   };
 
   return (
@@ -81,6 +101,7 @@ const AdminLoginPage = () => {
           />
         </div>
       </form>
+      {state.globalMessage && <SnackBar/>}
     </div>
   );
 };

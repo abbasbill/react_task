@@ -13,8 +13,32 @@ export default function MkdSDK() {
     this._table = table;
   };
   
-  this.login = async function (email, password, role) {
+  this.login = async function (payload) {
     //TODO
+    const header = {
+      "Content-Type": "application/json",
+       "x-project": "cmVhY3R0YXNrOmQ5aGVkeWN5djZwN3p3OHhpMzR0OWJtdHNqc2lneTV0Nw=="
+    }
+
+    
+
+    const login = await fetch(
+      this._baseurl + `/v2/api/lambda/login`,
+      {
+        method: "post",
+        headers: header,
+        body: JSON.stringify(payload),
+      }
+    );
+    const adminLogin = await login.json();
+
+    if (adminLogin.status === 400) {
+      console.log(adminLogin.message, "error");
+    }
+    return adminLogin;
+
+    
+    
   };
 
   this.getHeader = function () {
@@ -31,8 +55,9 @@ export default function MkdSDK() {
   this.callRestAPI = async function (payload, method) {
     const header = {
       "Content-Type": "application/json",
-      "x-project": base64Encode,
-      Authorization: "Bearer " + localStorage.getItem("token"),
+      "x-project":
+        "cmVhY3R0YXNrOmQ5aGVkeWN5djZwN3p3OHhpMzR0OWJtdHNqc2lneTV0Nw==",
+      Authorization: "Bearer " + JSON.parse(localStorage.getItem("token")),
     };
 
     switch (method) {
@@ -64,7 +89,7 @@ export default function MkdSDK() {
           payload.limit = 10;
         }
         const paginateResult = await fetch(
-          this._baseurl + `/v1/api/rest/${this._table}/${method}`,
+          this._baseurl + `/v1/api/rest/video/${method}`,
           {
             method: "post",
             headers: header,
